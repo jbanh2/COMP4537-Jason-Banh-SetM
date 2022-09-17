@@ -1,0 +1,68 @@
+Jason Banh Set M
+A01256265
+
+CHAPTER 1
+
+db.cars.insert({make: 'Honda', model: 'Accord', year: 2013, color: 'white'})
+
+db.cars.find()
+
+db.cars.getIndexes()
+
+db.cars.remove({})
+
+db.cars.insert({make: 'Honda', cylinders: 4, fuel-type: 'regular'})
+db.cars.insert({make: 'Ford', cylinders: 8, fuel-type: 'premium'})
+
+db.cars.remove({})
+
+db.cars.insert({make: 'Honda', model: 'Accord', year: 2013, color: 'white'})
+db.cars.insert({make: 'Ford', model: 'Mustang', year: 2017, color: 'blue'})
+db.cars.insert({make: 'Porsche', model: '911 GT3', year: 2019, color: 'white'})
+db.cars.insert({make: 'Honda', model: 'S2000', year: 2003, color: 'yellow'})
+
+db.cars.find({year: 2017})
+db.cars.find({cylinders: {$gte: 2017}})
+db.cars.find( $or: [{make: 'Honda}, {color: 'white'}]
+
+CHAPTER 2
+
+db.cars.update({make: 'Ford'}{model: 'GT'})
+
+db.cars.find({make: 'Ford'})
+
+db.cars.update({make: 'Ford', model: 'Mustang', year: 2017, color: 'blue'})
+
+db.cars.find({model: 'Mustang'})
+
+db.cars.update({model: 'Mustang'}, {$set: {year: 2020}})
+
+db.cars.update({model: 'Mustang'}, {$inc: {year: 1}})
+
+db.cars.update({model: 'Mustang'}, {$push: {color: 'white'}})
+
+UPSERTS
+
+db.hits.update({page: 'planes'}, {$inc: {hits: 1}});
+db.hits.find();
+
+db.cars.update({page: 'planes'}, {$inc: {hits: 1}}, {upsert: true});
+db.hits.find();
+
+db.cars.update({page: 'planes'}, {$inc: {hits: 1}}, {upsert: true});
+db.hits.find();
+
+db.cars.update({}, {$set: {year: 2022}});
+db.cars.find({year: 2022})
+
+db.cars.update({}, {$set: {year: 2022}}, {multi:true});
+db.cars.find({year: 2022})
+
+db.cars.find({},  {make: 'Honda'}, _id: 0);
+
+db.cars.find().sort({year: -1})
+
+db.cars.find().sort({year: -1}).limit(2).skip(1)
+
+db.cars.count({year: {$gt: 2010}})
+db.cars.find({year: {$gt: 2010}}).count()
