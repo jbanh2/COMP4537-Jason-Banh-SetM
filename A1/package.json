@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/jbanh2/COMP4537-Jason-Banh-SetM/issues"
   },
-  "homepage": "https://github.com/jbanh2/COMP4537-Jason-Banh-SetM#readme"
+  "homepage": "https://github.com/jbanh2/COMP4537-Jason-Banh-SetM#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
