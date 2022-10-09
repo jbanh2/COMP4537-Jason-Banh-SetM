@@ -1,0 +1,19 @@
+{
+  "name": "a1",
+  "version": "1.0.0",
+  "description": "Assignment 1",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jbanh2/COMP4537-Jason-Banh-SetM.git"
+  },
+  "author": "Jason Banh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jbanh2/COMP4537-Jason-Banh-SetM/issues"
+  },
+  "homepage": "https://github.com/jbanh2/COMP4537-Jason-Banh-SetM#readme"
+}
