@@ -38,7 +38,7 @@ app.listen(process.env.PORT || port, async () => {
     const pokemonSchema = new Schema({
         "id": {unique: true, required: true, type: Number}, // Pokemon #
         "name": {
-            "english": {type: String},
+            "english": {type: String, maxLength: 20},
             "japanese": String,
             "chinese": String,
             "french": String,
@@ -53,10 +53,6 @@ app.listen(process.env.PORT || port, async () => {
             "Speed": Number
         },
     });
-
-    pokemonSchema.path('name.english').validate(function(english) {
-        return english && english.length <= 20;
-    })
 
     // Model
     const pokeModel = mongoose.model('pokemon', pokemonSchema, "pokemons")
@@ -92,6 +88,7 @@ app.listen(process.env.PORT || port, async () => {
     app.post('/api/v1/pokemon', async (req, res) => {
         try {
             await pokeModel.create(req.body)
+            console.log("After Create")
         } catch (error) {
             console.error(error)
             return res.json(error)
