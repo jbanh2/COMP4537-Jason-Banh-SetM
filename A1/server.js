@@ -15,7 +15,7 @@ app.listen(process.env.PORT || port, async () => {
         await mongoose.connect(
             'mongodb+srv://admin:0IJz8N0ERBKHLFFg@cluster0.luxox6n.mongodb.net/?retryWrites=true&w=majority'
         );
-        mongoose.connection.dropDatabase();
+        mongoose.connection.db.dropDatabase();
         console.log('Connection Successful')
     } catch (error) {
         console.log('Database Connection Error')
@@ -86,7 +86,7 @@ app.listen(process.env.PORT || port, async () => {
     // - Create a Pokemon
     app.post('/api/v1/pokemon', async (req, res) => {
         try {
-
+            await pokeModel.create(req.body)
         } catch (error) {
             console.error(error)
         }
@@ -94,20 +94,33 @@ app.listen(process.env.PORT || port, async () => {
 
     // - Get a Pokemon
     app.get('/api/v1/pokemon/:id', async (req, res) => {
-
+        let paramId = req.params.id
+        try {
+            const pokemon = await pokeModel.find({id: paramId}).exec()
+            res.json(pokemon)
+        } catch (error) {
+            console.error(error)
+        }
     })
 
     // - Get a pokemon Image URL
     app.get('/api/v1/pokemonImage/:id', async (req, res) => {
+        let imageURL = "https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/images/" + parseImageID(req.body.id)
         try {
-
-        } catch {
-
+            res.json(imageURL)
+        } catch (error) {
+            console.error(error)
         }
     })
 
     // - Upsert a whole pokemon document
-    app.put('/api/v1/pokemon/:id')
+    app.put('/api/v1/pokemon/:id', async (req, res) => {
+        try {
+            await pokeModel.updateOne()
+        } catch (error) {
+            console.error(error)
+        }
+    })
 
     // - Patch a pokemon document or a portion of the pokemon document
     app.patch('/api/v1/pokemon/:id')
@@ -115,3 +128,13 @@ app.listen(process.env.PORT || port, async () => {
     // - Delete a  pokemon
     app.delete('/api/v1/pokemon/:id')
 })
+
+function parseImageID(id) {
+    /**
+     * Pads id with proper 0's to return a valid image URL
+     *
+     * @type {string}
+     */
+    let idString = "" + id
+    return idString.padStart(3, '0')
+}
