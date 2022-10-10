@@ -80,6 +80,7 @@ app.listen(process.env.PORT || port, async () => {
             return res.json(pokedex)
         } catch (error) {
             console.error(error)
+            return res.json(error)
         }
     })
 
@@ -89,6 +90,7 @@ app.listen(process.env.PORT || port, async () => {
             await pokeModel.create(req.body)
         } catch (error) {
             console.error(error)
+            return res.json(error)
         }
     })
 
@@ -110,23 +112,44 @@ app.listen(process.env.PORT || port, async () => {
             res.json(imageURL)
         } catch (error) {
             console.error(error)
+            return res.json(error)
         }
     })
 
     // - Upsert a whole pokemon document
     app.put('/api/v1/pokemon/:id', async (req, res) => {
+        let pokeID = req.body.id
         try {
-            await pokeModel.updateOne()
+            await pokeModel.updateOne({id: pokeID}, req.body, {upsert: true})
         } catch (error) {
             console.error(error)
+            return res.json(error)
         }
     })
 
     // - Patch a pokemon document or a portion of the pokemon document
-    app.patch('/api/v1/pokemon/:id')
+    app.patch('/api/v1/pokemon/:id', async (req, res) => {
+        let pokeID = req.body.id
+        try {
+            await pokeModel.find({id: pokeID}).exec()
+            await pokeModel.updateOne({id: pokeID}, req.body, {upsert: false})
+        } catch (error) {
+            console.error(error)
+            return res.json(error)
+        }
+    })
 
     // - Delete a  pokemon
-    app.delete('/api/v1/pokemon/:id')
+    app.delete('/api/v1/pokemon/:id', async (req, res) => {
+        let pokeID = req.body.id
+        try {
+            await pokeModel.find({id: pokeID}).exec()
+            await pokeModel.deleteOne({id: pokeID}).exec()
+        } catch (error) {
+            console.error(error)
+            return res.json(error)
+        }
+    })
 })
 
 function parseImageID(id) {
