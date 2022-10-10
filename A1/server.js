@@ -73,7 +73,7 @@ app.listen(process.env.PORT || port, async () => {
     )
 
     // Routes
-    // Get pokemon
+    // Get pokemons
     app.get('/api/v1/pokemons', async (req, res) => {
         try {
             const pokedex = await pokeModel.find({}).sort({'id': 'asc'}).skip(req.query.after).limit(req.query.count)
@@ -99,9 +99,13 @@ app.listen(process.env.PORT || port, async () => {
         let paramId = req.params.id
         try {
             const pokemon = await pokeModel.find({id: paramId}).exec()
+            if (pokemon.length === 0) {
+                throw("Pokemon not found!")
+            }
             res.json(pokemon)
         } catch (error) {
             console.error(error)
+            return res.json(error)
         }
     })
 
