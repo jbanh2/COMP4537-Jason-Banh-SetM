@@ -32,7 +32,28 @@ app.listen(process.env.PORT || port, async () => {
         }
     )
 
-    console.log(types);
+    // Read/Write to local db
+    const { writeFile, readFile } = require('fs')
+    const util = require('util')
+    const writeFileAsync = util.promisify(writeFile)
+    const readFileAsync = util.promisify(readFile)
+
+    // Create local empty db
+    var pokedexJSON = []
+
+    try {
+        // Read the local pokedex and store entries
+        pokedexJSON = await readFileAsync('./pokedex.json', 'utf-8')
+        if (!pokedexJSON) {
+          console.log("Could not read the file");
+          return
+        }
+        pokedexJSON = JSON.parse(pokedexJSON)
+        console.log(pokedexJSON);
+      } catch (error) {
+        console.log(error);
+      }
+      console.log(`Pokeapplistening on port ${port}`)
 
     // Schema Creation
     const pokemonSchema = new Schema({
@@ -99,10 +120,30 @@ app.listen(process.env.PORT || port, async () => {
     app.get('/api/v1/pokemon/:id', async (req, res) => {
         let paramId = req.params.id
         try {
+            // Check local database first
+            for (var i; i < pokedexJSON.length; i++) {
+                // Return pokemon if found
+                if (pokedexJSON[i].id === paramId) {
+                    return res.json(pokedexJSON[i])
+                }
+            }
+
+            // Get Pokemon from server if does not exist
             const pokemon = await pokeModel.find({id: paramId}).exec()
             if (pokemon.length === 0) {
                 throw("Pokemon not found!")
             }
+            
+            // Add the new pokemon
+            pokedexJSON.push(pokemon)
+
+            // Update File
+            writeFileAsync('./pokedex.json', JSON.stringify(pokedexJSON), 'utf-8')
+            .then(() => {
+             })
+            .catch((err) => { console.log(err); })
+
+            // Return request
             res.json(pokemon)
         } catch (error) {
             console.error(error)
@@ -135,21 +176,34 @@ app.listen(process.env.PORT || port, async () => {
     // - Patch a pokemon document or a portion of the pokemon document
     app.patch('/api/v1/pokemon/:id', async (req, res) => {
         let pokeID = req.body.id
+        let pokeEntry = req.body
         try {
-            await pokeModel.find({id: pokeID}).exec()
-            await pokeModel.updateOne({id: pokeID}, req.body, {upsert: false})
+            // Iterate through local pokedex
+            for (var i; i < pokedexJSON.length; i++) {
+                // If found overrite values
+                if (pokedexJSON[i].id === pokeID) {
+                    pokedexJSON[i] === pokeEntry
+                }
+            }
+            return res.json(pokedexJSON)
         } catch (error) {
             console.error(error)
             return res.json(error)
         }
     })
 
-    // - Delete a  pokemon
+    // This is a change
+
+    // - Delete a pokemon
     app.delete('/api/v1/pokemon/:id', async (req, res) => {
         let pokeID = req.body.id
         try {
-            await pokeModel.find({id: pokeID}).exec()
-            await pokeModel.deleteOne({id: pokeID}).exec()
+            for (var i; i < pokedexJSON.length; i++) {
+                if (pokedexJSON[i].id === pokeID) {
+                    delete pokedexJSON[i]
+                    res.json("Successfully deleted pokemon!")
+                }
+            }
         } catch (error) {
             console.error(error)
             return res.json(error)
