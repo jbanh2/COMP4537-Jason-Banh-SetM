@@ -31,11 +31,11 @@ const start = asyncWrapper(async () => {
   const pokeSchema = await getTypes();
   pokeModel = await populatePokemons(pokeSchema);
 
-  app.listen(process.env.PORT, (err) => {
+  app.listen(process.env.pokeServerPORT, (err) => {
     if (err)
       throw new PokemonDbError(err)
     else
-      console.log(`Phew! Server is running on port: ${process.env.PORT}`);
+      console.log(`Phew! Server is running on port: ${process.env.pokeServerPORT}`);
   })
 })
 start()
@@ -73,16 +73,23 @@ app.post('/login', asyncWrapper(async (req, res) => {
 
 
 // Any User
-const auth = (req, res, next) => {
-  const token = req.query.token
+const auth = async(req, res, next) => {
+  const token = req.query.userToken
   if (!token) {
-    throw new PokemonBadRequest("Access denied")
+    console.log("Access denied")
+    return
   }
   try {
     const verified = jwt.verify(token, process.env.TOKEN_SECRET) // nothing happens if token is valid
+    const user = await userModel.findOne({ userToken: token })
+    if (!user.isLoggedIn) {
+      console.log("User Not Logged In!")
+      return
+    }
     next()
   } catch (err) {
-    throw new PokemonBadRequest("Invalid token")
+    console.log("Invalid token")
+    return
   }
 }
 
@@ -126,16 +133,26 @@ app.use(handleErr)
 
 // Admin Only
 const admin_auth = async(req, res, next) => {
-  const token = req.query.token
-  const user = await PokemonUser.findOne({ userToken: token });
+  const token = req.query.userToken
+  const user = await userModel.findOne({ userToken: token });
+  if (!user.isLoggedIn) {
+    console.log("User Not Logged In!")
+    return
+  }
+  if (!user.isAdmin) {
+    console.log("User Not Admin!")
+    return
+  }
   if (!token) {
-    throw new PokemonBadRequest("Access denied")
+    console.log("Access denied")
+    return
   }
   try {
     const verified = jwt.verify(token, process.env.TOKEN_SECRET) // nothing happens if token is valid
     next()
   } catch (err) {
-    throw new PokemonBadRequest("Invalid token")
+    console.log("Invalid token")
+    return
   }
 }
 
