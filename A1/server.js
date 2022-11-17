@@ -85,9 +85,13 @@ app.listen(process.env.PORT || port, async () => {
     })
 
     // - Create a Pokemon
+    app.use(express.json())
     app.post('/api/v1/pokemon', async (req, res) => {
         try {
-            await pokeModel.create(req.body)
+            await pokeModel.create(req.body, (err) => {
+                if (err) res.json({errMsg: err})
+                else res.json({msg: 'Success'})
+            })
             console.log("After Create")
         } catch (error) {
             console.error(error)

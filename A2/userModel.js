@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { boolean } = require('webidl-conversions')
 
 const schema = new mongoose.Schema({
   username: {
@@ -26,7 +27,10 @@ const schema = new mongoose.Schema({
     unique: true,
     trim: true,
     min: 3
-  }
+  },
+  userToken: String,
+  isLoggedIn: Boolean,
+  isAdmin: Boolean
 })
 
 module.exports = mongoose.model('pokeusers', schema) //pokeUser is the name of the collection in the db

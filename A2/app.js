@@ -71,8 +71,10 @@ app.post('/login', asyncWrapper(async (req, res) => {
   res.send(user)
 }))
 
+
+// Any User
 const auth = (req, res, next) => {
-  const token = req.header('auth-token')
+  const token = req.query.token
   if (!token) {
     throw new PokemonBadRequest("Access denied")
   }
@@ -84,11 +86,8 @@ const auth = (req, res, next) => {
   }
 }
 
+app.use(auth) // Auth for any user
 
-
-
-
-app.use(auth) // Boom! All routes below this line are protected
 app.get('/api/v1/pokemons', asyncWrapper(async (req, res) => {
   if (!req.query["count"])
     req.query["count"] = 10
@@ -102,6 +101,45 @@ app.get('/api/v1/pokemons', asyncWrapper(async (req, res) => {
   res.json(docs)
   // } catch (err) { res.json(handleErr(err)) }
 }))
+
+app.delete('/api/v1/pokemon/:id', asyncWrapper(async (req, res) => {
+  // try {
+  const docs = await pokeModel.findOneAndRemove({ id: req.params.id })
+  if (docs)
+    res.json({
+      msg: "Deleted Successfully"
+    })
+  else
+    // res.json({ errMsg: "Pokemon not found" })
+    throw new PokemonNotFoundError("");
+  // } catch (err) { res.json(handleErr(err)) }
+}))
+
+app.get("*", (req, res) => {
+  // res.json({
+  //   msg: "Improper route. Check API docs plz."
+  // })
+  throw new PokemonNoSuchRouteError("");
+})
+
+app.use(handleErr)
+
+// Admin Only
+const admin_auth = async(req, res, next) => {
+  const token = req.query.token
+  const user = await PokemonUser.findOne({ userToken: token });
+  if (!token) {
+    throw new PokemonBadRequest("Access denied")
+  }
+  try {
+    const verified = jwt.verify(token, process.env.TOKEN_SECRET) // nothing happens if token is valid
+    next()
+  } catch (err) {
+    throw new PokemonBadRequest("Invalid token")
+  }
+}
+
+app.use(admin_auth) // Auth for Admin users
 
 app.get('/api/v1/pokemon/:id', asyncWrapper(async (req, res) => {
   // try {
@@ -121,19 +159,6 @@ app.post('/api/v1/pokemon/', asyncWrapper(async (req, res) => {
   res.json({
     msg: "Added Successfully"
   })
-  // } catch (err) { res.json(handleErr(err)) }
-}))
-
-app.delete('/api/v1/pokemon/:id', asyncWrapper(async (req, res) => {
-  // try {
-  const docs = await pokeModel.findOneAndRemove({ id: req.params.id })
-  if (docs)
-    res.json({
-      msg: "Deleted Successfully"
-    })
-  else
-    // res.json({ errMsg: "Pokemon not found" })
-    throw new PokemonNotFoundError("");
   // } catch (err) { res.json(handleErr(err)) }
 }))
 
@@ -180,12 +205,3 @@ app.patch('/api/v1/pokemon/:id', asyncWrapper(async (req, res) => {
   }
   // } catch (err) { res.json(handleErr(err)) }
 }))
-
-app.get("*", (req, res) => {
-  // res.json({
-  //   msg: "Improper route. Check API docs plz."
-  // })
-  throw new PokemonNoSuchRouteError("");
-})
-
-app.use(handleErr)
