@@ -1,11 +1,14 @@
 const { mongoose } = require('mongoose')
+const dotenv = require("dotenv")
+dotenv.config();
+// console.log(process.env)
 
 const connectDB = async () => {
   try {
-    const x = await mongoose.connect('mongodb://localhost:27017/test')
+    const x = await mongoose.connect(process.env.DB_STRING)
     console.log("Connected to db");
-    // mongoose.connection.db.dropDatabase(); // rubric item 2 - drop the database should not be there
-    // console.log("Dropped db");
+    mongoose.connection.db.dropDatabase();
+    console.log("Dropped db");
     // get the data from Github 
   } catch (error) {
     console.log('db error');
