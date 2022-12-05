@@ -1,9 +1,17 @@
 import * as React from 'react'
+import axios from 'axios'
 
 export default function Login() {
     const userLogin = (event) => {
         console.log(document.getElementById("username").value)
         console.log(document.getElementById("password").value)
+        axios.post('https://localhost:6000/login', 
+        {
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value,
+        }).then(res => {
+            
+        })
     }
     return (
         <div>

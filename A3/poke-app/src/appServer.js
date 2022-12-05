@@ -71,13 +71,30 @@ app.use(morgan(":method"))
 
 app.use(cors())
 
-app.post('/api/v1/login/', asyncWrapper(async (req, res) => {
+app.post('/login', asyncWrapper(async (req, res) => {
   // try {
-  console.log(req.body);
-  if (!req.body.id) throw new PokemonBadRequestMissingID()
-  const poke = await pokeModel.find({ "id": req.body.id })
-  if (poke.length != 0) throw new PokemonDuplicateError()
-  const pokeDoc = await pokeModel.create(req.body)
+  userModel.findOne({
+    username: req.body.username,
+    password: req.body.password,
+  },
+  function(err, user) {
+    if (err) {
+      req.status(406).send({
+        msg: "Invalid login"
+      })
+    }
+    else {
+      if (user) {
+        const access = jwt.sign({username: req.body.username}, process.env.TOKEN_SECRET)
+        res.send(access)
+      } else {
+        req.status(406).send({
+          msg: "Invalid login"
+        })
+      }
+    }
+  }
+  )
   res.json({
     msg: "Added Successfully"
   })
